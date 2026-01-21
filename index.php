@@ -17,9 +17,17 @@ if (isset($_SESSION["login"]) && $_SESSION["login"] === true) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2FB7D6;
+            --secondary: #3CCF91;
+            --dark: #1F3A4D;
+            --light: #F4FAFC;
+            --danger: #E74C3C;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #35a4bd, #30d5c8);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -110,9 +118,9 @@ if (isset($_SESSION["login"]) && $_SESSION["login"] === true) {
 </head>
 <body>
     <div class="landing-container">
-        <div class="logo">🍄</div>
-        <h1 class="title">SIMACMUR</h1>
-        <p class="subtitle">Sistem Monitoring Jamur IoT</p>
+        <!-- <div class="logo">🍄</div> -->
+        <h1 class="title">SiPhantom</h1>
+        <p class="subtitle">Sistem Monitoring IoT</p>
         
         <a href="login.php" class="btn-login">
             🔐 Masuk ke Dashboard

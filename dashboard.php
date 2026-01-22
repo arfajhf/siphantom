@@ -90,10 +90,10 @@ if ($selected_device) {
     }
 }
 
-// Fungsi untuk menentukan status kondisi jamur
+// Fungsi untuk menentukan status kondisi 
 function getMushroomStatus($suhu, $kelembaban, $kelembaban_udara)
 {
-    // Rentang ideal untuk jamur tiram
+    // Rentang ideal untuk  tiram
     $suhu_min = 22;
     $suhu_max = 28;
     $kelembaban_min = 80;
@@ -138,19 +138,19 @@ function getStatusMessage($status, $type)
 {
     $messages = [
         'suhu' => [
-            'optimal' => '✅ Ideal untuk pertumbuhan jamur',
+            'optimal' => '✅ Ideal untuk pertumbuhan ',
             'kurang_ideal' => '⚠️ Kurang ideal, perlu penyesuaian',
             'terlalu_dingin' => '🧊 Terlalu dingin, perlu pemanasan',
             'terlalu_panas' => '🔥 Terlalu panas, perlu pendinginan'
         ],
         'kelembaban' => [
-            'optimal' => '✅ Ideal untuk pertumbuhan jamur',
+            'optimal' => '✅ Ideal untuk pertumbuhan ',
             'kurang_ideal' => '⚠️ Kurang ideal, perlu penyesuaian',
             'terlalu_kering' => '🏜️ Terlalu kering, perlu penyiraman',
             'terlalu_lembab' => '💧 Terlalu lembab, perlu ventilasi'
         ],
         'kelembaban_udara' => [
-            'optimal' => '✅ Ideal untuk pertumbuhan jamur',
+            'optimal' => '✅ Ideal untuk pertumbuhan ',
             'kurang_ideal' => '⚠️ Kurang ideal, perlu penyesuaian',
             'terlalu_kering' => '🏜️ Terlalu kering, perlu penyiraman',
             'terlalu_lembab' => '💧 Terlalu lembab, perlu ventilasi'
@@ -653,10 +653,10 @@ if ($sensor_data) {
             <?php endif; ?>
 
             <!--             <?php if ($selected_device): ?> -->
-            <!-- Status Kondisi Jamur -->
+            <!-- Status Kondisi  -->
             <!--                 <?php if ($sensor_data && $mushroom_status): ?>
                 <div class="status-info">
-                    <h5 class="text-center mb-3">🍄 Status Kondisi Kumbung Jamur</h5>
+                    <h5 class="text-center mb-3">🍄 Status Kondisi Kumbung </h5>
                     <div class="status-overview">
                         <div class="status-item <?php echo ($mushroom_status['suhu'] == 'optimal') ? '' : (($mushroom_status['suhu'] == 'kurang_ideal') ? 'warning' : 'danger'); ?>">
                             <div class="d-flex align-items-center">
@@ -680,7 +680,7 @@ if ($sensor_data) {
 
             <!-- Rentang Ideal -->
             <!--                     <div class="ideal-range">
-                        <h6>📋 Rentang Ideal Jamur Tiram</h6>
+                        <h6>📋 Rentang Ideal  Tiram</h6>
                         <div class="range-item">
                             <span>🌡️ Suhu:</span>
                             <strong>22°C - 28°C</strong>
@@ -899,7 +899,7 @@ if ($sensor_data) {
             }
         }
 
-        // Fungsi untuk menentukan status kondisi jamur
+        // Fungsi untuk menentukan status kondisi 
         function getMushroomStatus(suhu, kelembaban) {
             const suhuMin = 22;
             const suhuMax = 28;
@@ -937,13 +937,13 @@ if ($sensor_data) {
         function getStatusMessage(status, type) {
             const messages = {
                 'suhu': {
-                    'optimal': '✅ Ideal untuk pertumbuhan jamur',
+                    'optimal': '✅ Ideal untuk pertumbuhan ',
                     'kurang_ideal': '⚠️ Kurang ideal, perlu penyesuaian',
                     'terlalu_dingin': '🧊 Terlalu dingin, perlu pemanasan',
                     'terlalu_panas': '🔥 Terlalu panas, perlu pendinginan'
                 },
                 'kelembaban': {
-                    'optimal': '✅ Ideal untuk pertumbuhan jamur',
+                    'optimal': '✅ Ideal untuk pertumbuhan ',
                     'kurang_ideal': '⚠️ Kurang ideal, perlu penyesuaian',
                     'terlalu_kering': '🏜️ Terlalu kering, perlu penyiraman',
                     'terlalu_lembab': '💧 Terlalu lembab, perlu ventilasi'

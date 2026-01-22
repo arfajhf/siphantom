@@ -52,24 +52,24 @@ if ($selected_device) {
                       WHERE kode_device = '$selected_device' 
                       ORDER BY timestamp DESC LIMIT 50";
     $analysis_result = mysqli_query($conn, $analysis_query);
-    
+
     $total_suhu = 0;
     $total_kelembaban = 0;
-    
+
     while ($row = mysqli_fetch_assoc($analysis_result)) {
         $analysis_data[] = $row;
         $total_suhu += $row['suhu'];
         $total_kelembaban += $row['kelembaban'];
-        
+
         // Update min/max values
         $max_suhu = max($max_suhu, $row['suhu']);
         $min_suhu = min($min_suhu, $row['suhu']);
         $max_kelembaban = max($max_kelembaban, $row['kelembaban']);
         $min_kelembaban = min($min_kelembaban, $row['kelembaban']);
-        
+
         $data_count++;
     }
-    
+
     if ($data_count > 0) {
         $avg_suhu = $total_suhu / $data_count;
         $avg_kelembaban = $total_kelembaban / $data_count;
@@ -77,7 +77,8 @@ if ($selected_device) {
 }
 
 // Fungsi untuk menentukan status berdasarkan nilai
-function getStatusSuhu($suhu) {
+function getStatusSuhu($suhu)
+{
     if ($suhu >= 25 && $suhu <= 30) {
         return ['status' => 'optimal', 'text' => 'Optimal', 'class' => 'status-optimal'];
     } elseif (($suhu >= 20 && $suhu < 25) || ($suhu > 30 && $suhu <= 35)) {
@@ -87,7 +88,8 @@ function getStatusSuhu($suhu) {
     }
 }
 
-function getStatusKelembaban($kelembaban) {
+function getStatusKelembaban($kelembaban)
+{
     if ($kelembaban >= 60 && $kelembaban <= 80) {
         return ['status' => 'optimal', 'text' => 'Optimal', 'class' => 'status-optimal'];
     } elseif (($kelembaban >= 50 && $kelembaban < 60) || ($kelembaban > 80 && $kelembaban <= 90)) {
@@ -97,61 +99,66 @@ function getStatusKelembaban($kelembaban) {
     }
 }
 
-// Analisis pola penyiraman berdasarkan data
-function getRekomendasi($avg_suhu, $avg_kelembaban) {
+// Analisis pola penyiraman berdasarkan data lingkungan
+function getRekomendasi($avg_suhu, $avg_kelembaban)
+{
     $rekomendasi = [];
-    
+
     // Rekomendasi berdasarkan suhu
     if ($avg_suhu > 30) {
         $rekomendasi[] = [
             'type' => 'suhu_tinggi',
             'icon' => '🌡️',
-            'title' => 'Suhu Tinggi Terdeteksi',
-            'message' => 'Suhu rata-rata ' . number_format($avg_suhu, 1) . '°C cukup tinggi. Tingkatkan frekuensi penyiraman dan pastikan area memiliki sirkulasi udara yang baik.',
-            'action' => 'Siram 2-3 kali sehari pada pagi dan sore hari'
+            'title' => 'Suhu Tinggi',
+            'message' => 'Suhu rata-rata ' . number_format($avg_suhu, 1) . '°C terdeteksi cukup tinggi. Kondisi ini dapat meningkatkan penguapan air pada tanaman.',
+            'action' => 'Tingkatkan frekuensi penyiraman dan lakukan penyiraman pada pagi atau sore hari.'
         ];
     } elseif ($avg_suhu < 25) {
         $rekomendasi[] = [
             'type' => 'suhu_rendah',
             'icon' => '❄️',
-            'title' => 'Suhu Cukup Rendah',
-            'message' => 'Suhu rata-rata ' . number_format($avg_suhu, 1) . '°C cukup rendah. Kurangi frekuensi penyiraman untuk menghindari kelembaban berlebih.',
-            'action' => 'Siram 1-2 kali sehari, hindari penyiraman malam hari'
+            'title' => 'Suhu Rendah',
+            'message' => 'Suhu rata-rata ' . number_format($avg_suhu, 1) . '°C terdeteksi relatif rendah dan dapat memperlambat pertumbuhan tanaman.',
+            'action' => 'Kurangi frekuensi penyiraman dan hindari penyiraman pada malam hari.'
         ];
     }
-    
+
     // Rekomendasi berdasarkan kelembaban
     if ($avg_kelembaban > 80) {
         $rekomendasi[] = [
             'type' => 'kelembaban_tinggi',
             'icon' => '💧',
             'title' => 'Kelembaban Tinggi',
-            'message' => 'Kelembaban rata-rata ' . number_format($avg_kelembaban, 1) . '% cukup tinggi. Kurangi frekuensi penyiraman dan tingkatkan ventilasi.',
-            'action' => 'Kurangi Lama waktu penyiraman dan Buka Ventilasi'
+            'message' => 'Kelembaban rata-rata ' . number_format($avg_kelembaban, 1) . '% terdeteksi cukup tinggi dan berpotensi membuat media tanam terlalu basah.',
+            'action' => 'Kurangi frekuensi penyiraman dan pastikan sirkulasi udara berjalan dengan baik.'
         ];
     } elseif ($avg_kelembaban < 60) {
         $rekomendasi[] = [
             'type' => 'kelembaban_rendah',
             'icon' => '🏜️',
             'title' => 'Kelembaban Rendah',
-            'message' => 'Kelembaban rata-rata ' . number_format($avg_kelembaban, 1) . '% cukup rendah. Tingkatkan frekuensi penyiraman.',
-            'action' => 'Tingkatkan frekuensi penyiraman dan Tutup Ventilasi.'
+            'message' => 'Kelembaban rata-rata ' . number_format($avg_kelembaban, 1) . '% masih rendah sehingga tanaman membutuhkan tambahan air.',
+            'action' => 'Tingkatkan frekuensi penyiraman untuk menjaga kelembaban lingkungan tanaman.'
         ];
     }
-    
-    // Rekomendasi jadwal ideal
-    if ($avg_suhu >= 25 && $avg_suhu <= 30 && $avg_kelembaban >= 60 && $avg_kelembaban <= 80) {
+
+    // Kondisi optimal
+    if (
+        $avg_suhu >= 25 && $avg_suhu <= 30 &&
+        $avg_kelembaban >= 60 && $avg_kelembaban <= 80
+    ) {
         $rekomendasi[] = [
             'type' => 'optimal',
             'icon' => '✅',
             'title' => 'Kondisi Optimal',
-            'message' => 'Kondisi lingkungan sudah optimal untuk pertumbuhan jamur. Pertahankan pola penyiraman saat ini.',
-            'action' => 'Siram 2 kali sehari (pagi dan sore) dengan volume sedang'
+            'message' => 'Kondisi suhu dan kelembaban saat ini sudah sesuai untuk mendukung pertumbuhan tanaman.',
+            'action' => 'Pertahankan pola penyiraman yang sedang berjalan.'
         ];
     }
-    
+
     return $rekomendasi;
 }
+
 
 $status_suhu = getStatusSuhu($avg_suhu);
 $status_kelembaban = getStatusKelembaban($avg_kelembaban);
@@ -180,6 +187,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -200,12 +208,12 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
             background: var(--light);
             min-height: 100vh;
         }
-        
+
         .navbar {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1); 
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
@@ -218,12 +226,12 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
             cursor: pointer;
             padding: 8px 15px;
             border-radius: 20px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             transition: all 0.3s;
         }
 
         .user-profile:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .user-avatar {
@@ -241,13 +249,13 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
         .dropdown-menu {
             border-radius: 15px;
             border: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
 
         .card {
             border-radius: 15px;
             border: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             margin-bottom: 25px;
         }
 
@@ -274,7 +282,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
             background: white;
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
@@ -338,7 +346,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
             justify-content: space-between;
             align-items: center;
             padding: 15px;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 10px;
             margin: 10px 0;
         }
@@ -362,9 +370,17 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
             margin-right: 8px;
         }
 
-        .status-optimal { background-color: #28a745; }
-        .status-warning { background-color: #ffc107; }
-        .status-danger { background-color: #dc3545; }
+        .status-optimal {
+            background-color: #28a745;
+        }
+
+        .status-warning {
+            background-color: #ffc107;
+        }
+
+        .status-danger {
+            background-color: #dc3545;
+        }
 
         .device-selector {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -382,7 +398,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
         }
 
         .stat-item {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
             text-align: center;
@@ -406,6 +422,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
@@ -424,14 +441,18 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
                 <ul class="dropdown-menu dropdown-menu-end">
                     <?php if ($is_superadmin): ?>
                         <li><a class="dropdown-item" href="superadmin.php">👑 Superadmin Panel</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                     <?php endif; ?>
                     <li><a class="dropdown-item" href="dashboard.php">📊 Dashboard</a></li>
                     <li><a class="dropdown-item" href="daftar-device.php">📱 Kelola Device</a></li>
                     <li><a class="dropdown-item" href="pengaturan-jadwal.php">⏰ Jadwal Penyiraman</a></li>
                     <li><a class="dropdown-item" href="analisis.php">📈 Analisis</a></li>
                     <li><a class="dropdown-item" href="tips.php">💡 Tips</a></li>
-                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li><a class="dropdown-item" href="logout.php">🚪 Keluar</a></li>
                 </ul>
             </div>
@@ -452,48 +473,48 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
         <?php else: ?>
             <!-- Device Info -->
             <?php if ($selected_device && $device_name): ?>
-            <div class="device-selector">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5><strong>💡 Rekomendasi untuk Device</strong></h5>
-                        <p class="mb-0" style="opacity: 0.9;">
-                            <?php echo htmlspecialchars($device_name); ?> (<?php echo $selected_device; ?>)
-                        </p>
+                <div class="device-selector">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5><strong>💡 Rekomendasi untuk Device</strong></h5>
+                            <p class="mb-0" style="opacity: 0.9;">
+                                <?php echo htmlspecialchars($device_name); ?> (<?php echo $selected_device; ?>)
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <small style="opacity: 0.8;">Berdasarkan <?php echo $data_count; ?> data terbaru</small>
+                        </div>
                     </div>
-                    <div class="text-end">
-                        <small style="opacity: 0.8;">Berdasarkan <?php echo $data_count; ?> data terbaru</small>
-                    </div>
-                </div>
 
-                <?php if ($data_count > 0): ?>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-value"><?php echo number_format($avg_suhu, 1); ?>°C</span>
-                        <span class="stat-label">Rata-rata Suhu</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value"><?php echo number_format($avg_kelembaban, 1); ?>%</span>
-                        <span class="stat-label">Rata-rata Kelembaban</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value"><?php echo number_format($min_suhu, 1); ?>°C</span>
-                        <span class="stat-label">Suhu Minimum</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value"><?php echo number_format($max_suhu, 1); ?>°C</span>
-                        <span class="stat-label">Suhu Maksimum</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value"><?php echo number_format($min_kelembaban, 1); ?>%</span>
-                        <span class="stat-label">Kelembaban Minimum</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value"><?php echo number_format($max_kelembaban, 1); ?>%</span>
-                        <span class="stat-label">Kelembaban Maksimum</span>
-                    </div>
+                    <?php if ($data_count > 0): ?>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-value"><?php echo number_format($avg_suhu, 1); ?>°C</span>
+                                <span class="stat-label">Rata-rata Suhu</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value"><?php echo number_format($avg_kelembaban, 1); ?>%</span>
+                                <span class="stat-label">Rata-rata Kelembaban</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value"><?php echo number_format($min_suhu, 1); ?>°C</span>
+                                <span class="stat-label">Suhu Minimum</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value"><?php echo number_format($max_suhu, 1); ?>°C</span>
+                                <span class="stat-label">Suhu Maksimum</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value"><?php echo number_format($min_kelembaban, 1); ?>%</span>
+                                <span class="stat-label">Kelembaban Minimum</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value"><?php echo number_format($max_kelembaban, 1); ?>%</span>
+                                <span class="stat-label">Kelembaban Maksimum</span>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
-            </div>
             <?php endif; ?>
 
             <?php if ($data_count > 0): ?>
@@ -515,7 +536,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
                                     Rentang: <?php echo number_format($min_suhu, 1); ?>°C - <?php echo number_format($max_suhu, 1); ?>°C
                                 </div>
                             </div>
-                            
+
                             <div class="analysis-card humidity">
                                 <div class="analysis-label">💧 KELEMBABAN RATA-RATA</div>
                                 <div class="analysis-value"><?php echo number_format($avg_kelembaban, 1); ?>%</div>
@@ -576,16 +597,15 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                        
+
                         <div class="alert alert-info mt-3">
-                            <strong>💡 Tips:</strong> Jadwal ini berdasarkan analisis kondisi rata-rata lingkungan Anda. 
-                            Sesuaikan dengan kondisi cuaca dan kebutuhan spesifik tanaman jamur Anda.
+                            <strong>💡 Tips:</strong> Jadwal ini berdasarkan analisis hasil dari riwayat penyiraman setiap harinya.
                         </div>
                     </div>
                 </div>
 
                 <!-- Kondisi Ideal -->
-<!--                 <div class="card">
+                <!--                 <div class="card">
                     <div class="card-header">
                         <h5>🎯 Kondisi Ideal untuk Jamur</h5>
                     </div>
@@ -621,7 +641,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
             <?php endif; ?>
         <?php endif; ?>
 
-        
+
         <!-- Status Rekomendasi -->
         <div class="card">
             <div class="card-header">
@@ -630,14 +650,28 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
             <div class="card-body">
                 <div class="recommendation-card">
                     <h6><strong>🎯 Status Kondisi:</strong></h6>
-                    <p><span class="status-indicator status-optimal"></span><strong>OPTIMAL:</strong> Kondisi ideal untuk pertumbuhan jamur</p>
-                    <p><span class="status-indicator status-warning"></span><strong>PERHATIAN:</strong> Perlu penyesuaian suhu/kelembaban</p>
-                    <p><span class="status-indicator status-danger"></span><strong>KRITIS:</strong> Segera lakukan tindakan koreksi</p>
+
+                    <p>
+                        <span class="status-indicator status-optimal"></span>
+                        <strong>OPTIMAL:</strong> Kondisi lingkungan sesuai untuk mendukung pertumbuhan tanaman
+                    </p>
+
+                    <p>
+                        <span class="status-indicator status-warning"></span>
+                        <strong>PERHATIAN:</strong> Diperlukan penyesuaian suhu atau kelembaban
+                    </p>
+
+                    <p>
+                        <span class="status-indicator status-danger"></span>
+                        <strong>KRITIS:</strong> Kondisi lingkungan tidak ideal, segera lakukan tindakan koreksi
+                    </p>
                 </div>
             </div>
         </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

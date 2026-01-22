@@ -349,29 +349,29 @@ if (empty($_SESSION["user_role"])) {
         <!-- Rekomendasi Kondisi Optimal -->
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">🌡️ Kondisi Optimal Kumbung Jamur Tiram</h5>
+                <h5 class="mb-0">🌡️ Kondisi Lingkungan Tanaman Optimal</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="optimal-range">
-                            <h6><strong>🌡️ Suhu Optimal</strong></h6>
+                            <h6><strong>🌡️ Suhu Ideal</strong></h6>
                             <p class="mb-2"><strong>24°C - 28°C</strong></p>
                             <small>
-                                • Suhu ideal untuk pertumbuhan miselium<br>
-                                • Hindari fluktuasi suhu yang ekstrem<br>
-                                • Gunakan ventilasi untuk kontrol suhu
+                                • Suhu yang mendukung pertumbuhan tanaman<br>
+                                • Hindari perubahan suhu yang terlalu ekstrem<br>
+                                • Gunakan ventilasi untuk menjaga kestabilan suhu
                             </small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="optimal-range">
-                            <h6><strong>💧 Kelembaban Optimal</strong></h6>
+                            <h6><strong>💧 Kelembaban Ideal</strong></h6>
                             <p class="mb-2"><strong>80% - 90%</strong></p>
                             <small>
-                                • Kelembaban tinggi untuk pertumbuhan<br>
-                                • Gunakan humidifier jika perlu<br>
-                                • Pastikan sirkulasi udara baik
+                                • Kelembaban yang cukup untuk menjaga kondisi tanaman<br>
+                                • Tambahkan penyiraman jika kelembaban menurun<br>
+                                • Pastikan sirkulasi udara tetap baik
                             </small>
                         </div>
                     </div>
@@ -386,7 +386,7 @@ if (empty($_SESSION["user_role"])) {
             </div>
             <div class="card-body">
                 <div class="watering-schedule">
-                    <h6><strong>⏰ Waktu Penyiraman Optimal:</strong></h6>
+                    <h6><strong>⏰ Waktu Penyiraman yang Disarankan:</strong></h6>
                     <div class="row">
                         <div class="col-md-4">
                             <p><strong>🌅 Pagi:</strong> 08:00 - 09:00</p>
@@ -402,6 +402,7 @@ if (empty($_SESSION["user_role"])) {
             </div>
         </div>
     </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

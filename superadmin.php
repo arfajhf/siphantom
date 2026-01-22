@@ -335,7 +335,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <span class="navbar-brand">
-                👑 SIMACMUR SUPERADMIN
+                👑 SiPhantom SUPERADMIN
                 <span class="superadmin-badge">SUPER ADMIN</span>
             </span>
             <div class="navbar-nav ms-auto">

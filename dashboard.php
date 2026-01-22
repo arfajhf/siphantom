@@ -91,7 +91,7 @@ if ($selected_device) {
 }
 
 // Fungsi untuk menentukan status kondisi jamur
-function getMushroomStatus($suhu, $kelembaban)
+function getMushroomStatus($suhu, $kelembaban, $kelembaban_udara)
 {
     // Rentang ideal untuk jamur tiram
     $suhu_min = 22;
@@ -101,6 +101,7 @@ function getMushroomStatus($suhu, $kelembaban)
 
     $suhu_status = 'optimal';
     $kelembaban_status = 'optimal';
+    $udara_status = 'optimal';
 
     // Cek status suhu
     if ($suhu < $suhu_min - 2) {
@@ -120,7 +121,16 @@ function getMushroomStatus($suhu, $kelembaban)
         $kelembaban_status = 'kurang_ideal';
     }
 
-    return ['suhu' => $suhu_status, 'kelembaban' => $kelembaban_status];
+    // Cek status kelembaban_udara
+    if ($kelembaban_udara < $kelembaban_min - 10) {
+        $udara_status = 'terlalu_kering';
+    } elseif ($kelembaban_udara > $kelembaban_max + 5) {
+        $udara_status = 'terlalu_lembab';
+    } elseif ($kelembaban_udara < $kelembaban_min || $kelembaban_udara > $kelembaban_max) {
+        $udara_status = 'kurang_ideal';
+    }
+
+    return ['suhu' => $suhu_status, 'kelembaban' => $kelembaban_status, 'kelembaban_udara' => $udara_status];
 }
 
 // Fungsi untuk mendapatkan pesan status
@@ -134,6 +144,12 @@ function getStatusMessage($status, $type)
             'terlalu_panas' => '🔥 Terlalu panas, perlu pendinginan'
         ],
         'kelembaban' => [
+            'optimal' => '✅ Ideal untuk pertumbuhan jamur',
+            'kurang_ideal' => '⚠️ Kurang ideal, perlu penyesuaian',
+            'terlalu_kering' => '🏜️ Terlalu kering, perlu penyiraman',
+            'terlalu_lembab' => '💧 Terlalu lembab, perlu ventilasi'
+        ],
+        'kelembaban_udara' => [
             'optimal' => '✅ Ideal untuk pertumbuhan jamur',
             'kurang_ideal' => '⚠️ Kurang ideal, perlu penyesuaian',
             'terlalu_kering' => '🏜️ Terlalu kering, perlu penyiraman',
@@ -165,7 +181,7 @@ function getStatusClass($status)
 // Hitung status jika ada data sensor
 $mushroom_status = null;
 if ($sensor_data) {
-    $mushroom_status = getMushroomStatus($sensor_data['suhu'], $sensor_data['kelembaban']);
+    $mushroom_status = getMushroomStatus($sensor_data['suhu'], $sensor_data['kelembaban'], $sensor_data['kelembaban_udara']);
 }
 ?>
 
@@ -744,6 +760,38 @@ if ($sensor_data) {
                                     </div>
                                     <div class="status-message" id="kelembaban-message">
                                         <?php echo getStatusMessage($mushroom_status['kelembaban'], 'kelembaban'); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="data-card humidity">
+                                <div class="data-label">💧 KELEMBABAN UDARA</div>
+                                <div class="data-value" id="kelembaban-display">
+                                    <?php echo number_format($sensor_data['kelembaban_udara'], 1); ?>
+                                </div>
+                                <div class="data-unit">%</div>
+
+                                <?php if ($mushroom_status): ?>
+                                    <div class="status-badge" id="kelembaban-status">
+                                        <?php
+                                            switch ($mushroom_status['kelembaban_udara']) {
+                                                case 'optimal':
+                                                    echo '✅ IDEAL';
+                                                    break;
+                                                case 'kurang_ideal':
+                                                    echo '⚠️ KURANG IDEAL';
+                                                    break;
+                                                case 'terlalu_kering':
+                                                    echo '🏜️ TERLALU KERING';
+                                                    break;
+                                                case 'terlalu_lembab':
+                                                    echo '💧 TERLALU LEMBAB';
+                                                    break;
+                                            }
+                                        ?>
+                                    </div>
+                                    <div class="status-message" id="kelembaban-message">
+                                        <?php echo getStatusMessage($mushroom_status['kelembaban_udara'], 'kelembaban_udara'); ?>
                                     </div>
                                 <?php endif; ?>
                             </div>

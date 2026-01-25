@@ -91,7 +91,7 @@ if ($selected_device) {
 }
 
 // Fungsi untuk menentukan status kondisi 
-function getMushroomStatus($suhu, $kelembaban, $kelembaban_udara)
+function getMushroomStatus($suhu, $soil_moisture, $kelembaban_udara)
 {
     // Rentang ideal untuk  tiram
     $suhu_min = 22;
@@ -113,11 +113,11 @@ function getMushroomStatus($suhu, $kelembaban, $kelembaban_udara)
     }
 
     // Cek status kelembaban
-    if ($kelembaban < $kelembaban_min - 10) {
+    if ($soil_moisture < $kelembaban_min - 10) {
         $kelembaban_status = 'terlalu_kering';
-    } elseif ($kelembaban > $kelembaban_max + 5) {
+    } elseif ($soil_moisture > $kelembaban_max + 5) {
         $kelembaban_status = 'terlalu_lembab';
-    } elseif ($kelembaban < $kelembaban_min || $kelembaban > $kelembaban_max) {
+    } elseif ($soil_moisture < $kelembaban_min || $soil_moisture > $kelembaban_max) {
         $kelembaban_status = 'kurang_ideal';
     }
 
@@ -130,7 +130,7 @@ function getMushroomStatus($suhu, $kelembaban, $kelembaban_udara)
         $udara_status = 'kurang_ideal';
     }
 
-    return ['suhu' => $suhu_status, 'kelembaban' => $kelembaban_status, 'kelembaban_udara' => $udara_status];
+    return ['suhu' => $suhu_status, 'soil_moisture' => $soil_moisture, 'kelembaban' => $udara_status];
 }
 
 // Fungsi untuk mendapatkan pesan status
@@ -143,13 +143,13 @@ function getStatusMessage($status, $type)
             'terlalu_dingin' => '🧊 Terlalu dingin, perlu pemanasan',
             'terlalu_panas' => '🔥 Terlalu panas, perlu pendinginan'
         ],
-        'kelembaban' => [
+        'soil_moisture' => [
             'optimal' => '✅ Ideal untuk pertumbuhan ',
             'kurang_ideal' => '⚠️ Kurang ideal, perlu penyesuaian',
             'terlalu_kering' => '🏜️ Terlalu kering, perlu penyiraman',
             'terlalu_lembab' => '💧 Terlalu lembab, perlu ventilasi'
         ],
-        'kelembaban_udara' => [
+        'kelembaban' => [
             'optimal' => '✅ Ideal untuk pertumbuhan ',
             'kurang_ideal' => '⚠️ Kurang ideal, perlu penyesuaian',
             'terlalu_kering' => '🏜️ Terlalu kering, perlu penyiraman',
@@ -742,7 +742,7 @@ if ($sensor_data) {
                                 <?php if ($mushroom_status): ?>
                                     <div class="status-badge" id="kelembaban-status">
                                         <?php
-                                            switch ($mushroom_status['soil_moisture']) {
+                                            switch ($mushroom_status['kelembaban']) {
                                                 case 'optimal':
                                                     echo '✅ IDEAL';
                                                     break;
@@ -759,7 +759,7 @@ if ($sensor_data) {
                                         ?>
                                     </div>
                                     <div class="status-message" id="kelembaban-message">
-                                        <?php echo getStatusMessage($mushroom_status['soil_moisture'], 'soil_moisture'); ?>
+                                        <?php echo getStatusMessage($mushroom_status['kelembaban'], 'kelembaban'); ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -900,14 +900,17 @@ if ($sensor_data) {
         }
 
         // Fungsi untuk menentukan status kondisi 
-        function getMushroomStatus(suhu, kelembaban) {
+        function getMushroomStatus(suhu, kelembaban, udara) {
             const suhuMin = 22;
             const suhuMax = 28;
             const kelembabanMin = 80;
             const kelembabanMax = 90;
+            const udaraMin = 80;
+            const udaraMax = 90;
 
             let suhuStatus = 'optimal';
             let kelembabanStatus = 'optimal';
+            let udaraStatus = 'optimal';
 
             // Cek status suhu
             if (suhu < suhuMin - 2) {
@@ -927,9 +930,19 @@ if ($sensor_data) {
                 kelembabanStatus = 'kurang_ideal';
             }
 
+            // Cek status kelembaban
+            if (udara < udaraMin - 10) {
+                kelembabanStatus = 'terlalu_kering';
+            } else if (udara > udaraMax + 5) {
+                udaraStatus = 'terlalu_lembab';
+            } else if (udara < udaraMin || udara > udaraMax) {
+                udaraStatus = 'kurang_ideal';
+            }
+
             return {
                 suhu: suhuStatus,
-                kelembaban: kelembabanStatus
+                kelembaban: kelembabanStatus,
+                kelembaban_udara: udaraStatus
             };
         }
 
@@ -943,6 +956,12 @@ if ($sensor_data) {
                     'terlalu_panas': '🔥 Terlalu panas, perlu pendinginan'
                 },
                 'kelembaban': {
+                    'optimal': '✅ Ideal untuk pertumbuhan ',
+                    'kurang_ideal': '⚠️ Kurang ideal, perlu penyesuaian',
+                    'terlalu_kering': '🏜️ Terlalu kering, perlu penyiraman',
+                    'terlalu_lembab': '💧 Terlalu lembab, perlu ventilasi'
+                },
+                'kelembaban_udara': {
                     'optimal': '✅ Ideal untuk pertumbuhan ',
                     'kurang_ideal': '⚠️ Kurang ideal, perlu penyesuaian',
                     'terlalu_kering': '🏜️ Terlalu kering, perlu penyiraman',
@@ -974,8 +993,8 @@ if ($sensor_data) {
         }
 
         // Fungsi untuk update status cards
-        function updateStatusCards(suhu, kelembaban) {
-            const status = getMushroomStatus(parseFloat(suhu), parseFloat(kelembaban));
+        function updateStatusCards(suhu, kelembaban, udara) {
+            const status = getMushroomStatus(parseFloat(suhu), parseFloat(kelembaban), parseFloat(udara));
 
             // Update status suhu
             const suhuStatusElement = document.getElementById('suhu-status');
@@ -996,6 +1015,16 @@ if ($sensor_data) {
             if (kelembabanMessageElement) {
                 kelembabanMessageElement.textContent = getStatusMessage(status.kelembaban, 'kelembaban');
             }
+
+            // Update status kelembaban
+            const udaraStatusElement = document.getElementById('udara-status');
+            const udaraMessageElement = document.getElementById('udara-message');
+            if (udaraStatusElement) {
+                udaraStatusElement.textContent = getStatusBadge(status.udara);
+            }
+            if (udaraMessageElement) {
+                udaraMessageElement.textContent = getStatusMessage(status.udara, 'udara');
+            }
         }
 
         // Auto refresh data setiap 1 detik
@@ -1009,8 +1038,9 @@ if ($sensor_data) {
                         return response.json();
                     })
                     .then(data => {
-                        if (data.suhu !== undefined && data.kelembaban !== undefined) {
+                        if (data.suhu !== undefined && data.soil_moisture !== undefined && data.kelembaban !== undefined) {
                             const newSuhu = parseFloat(data.suhu).toFixed(1);
+                            const newSoil_moisture = parseFloat(data.soil_moisture).toFixed(1);
                             const newKelembaban = parseFloat(data.kelembaban).toFixed(1);
 
                             // Update suhu jika ada perubahan
@@ -1021,6 +1051,13 @@ if ($sensor_data) {
                             }
 
                             // Update kelembaban jika ada perubahan
+                            if (newSoil_moisture !== lastSoil_moisture) {
+                                document.getElementById('kelembaban-display').textContent = newSoil_moisture;
+                                animateUpdate('kelembaban-display');
+                                lastSoil_moisture = newSoil_moisture;
+                            }
+
+                            // Update kelembaban jika ada perubahan
                             if (newKelembaban !== lastKelembaban) {
                                 document.getElementById('kelembaban-display').textContent = newKelembaban;
                                 animateUpdate('kelembaban-display');
@@ -1028,7 +1065,7 @@ if ($sensor_data) {
                             }
 
                             // Update status cards
-                            updateStatusCards(newSuhu, newKelembaban);
+                            updateStatusCards(newSuhu, newKelembaban, newSoil_moisture);
 
                             // Update timestamp jika ada perubahan
                             if (data.tanggal && data.waktu) {

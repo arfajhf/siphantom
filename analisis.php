@@ -45,27 +45,33 @@ $max_suhu = 0;
 $min_suhu = 100;
 $max_kelembaban = 0;
 $min_kelembaban = 100;
+$max_udara = 0;
+$min_udara = 100;
 $data_count = 0;
 
 if ($selected_device) {
-    $analysis_query = "SELECT suhu, kelembaban, tanggal, waktu FROM sensors 
+    $analysis_query = "SELECT * FROM sensors 
                       WHERE kode_device = '$selected_device' 
                       ORDER BY timestamp DESC LIMIT 50";
     $analysis_result = mysqli_query($conn, $analysis_query);
 
     $total_suhu = 0;
     $total_kelembaban = 0;
+    $total_udara = 0;
 
     while ($row = mysqli_fetch_assoc($analysis_result)) {
         $analysis_data[] = $row;
         $total_suhu += $row['suhu'];
-        $total_kelembaban += $row['kelembaban'];
+        $total_kelembaban += $row['soil_moisture'];
+        $total_udara += $row['kelembaban'];
 
         // Update min/max values
         $max_suhu = max($max_suhu, $row['suhu']);
         $min_suhu = min($min_suhu, $row['suhu']);
-        $max_kelembaban = max($max_kelembaban, $row['kelembaban']);
-        $min_kelembaban = min($min_kelembaban, $row['kelembaban']);
+        $max_kelembaban = max($max_kelembaban, $row['soil_moisture']);
+        $min_kelembaban = min($min_kelembaban, $row['soil_moisture']);
+        $max_udara = max($max_udara, $row['kelembaban']);
+        $min_udara = min($min_udara, $row['kelembaban']);
 
         $data_count++;
     }
@@ -73,6 +79,7 @@ if ($selected_device) {
     if ($data_count > 0) {
         $avg_suhu = $total_suhu / $data_count;
         $avg_kelembaban = $total_kelembaban / $data_count;
+        $avg_udara = $total_udara / $data_count;
     }
 }
 
@@ -99,8 +106,19 @@ function getStatusKelembaban($kelembaban)
     }
 }
 
+function getStatusUdara($udara)
+{
+    if ($udara >= 60 && $udara <= 80) {
+        return ['status' => 'optimal', 'text' => 'Optimal', 'class' => 'status-optimal'];
+    } elseif (($udara >= 50 && $udara < 60) || ($udara > 80 && $udara <= 90)) {
+        return ['status' => 'warning', 'text' => 'Perlu Perhatian', 'class' => 'status-warning'];
+    } else {
+        return ['status' => 'danger', 'text' => 'Tidak Optimal', 'class' => 'status-danger'];
+    }
+}
+
 // Analisis pola penyiraman berdasarkan data lingkungan
-function getRekomendasi($avg_suhu, $avg_kelembaban)
+function getRekomendasi($avg_suhu, $avg_kelembaban, $avg_udara)
 {
     $rekomendasi = [];
 
@@ -142,10 +160,30 @@ function getRekomendasi($avg_suhu, $avg_kelembaban)
         ];
     }
 
+    // Rekomendasi berdasarkan kelembaban
+    if ($avg_udara > 80) {
+        $rekomendasi[] = [
+            'type' => 'kelembaban_tinggi',
+            'icon' => '💧',
+            'title' => 'Kelembaban Tinggi',
+            'message' => 'Kelembaban rata-rata ' . number_format($avg_udara, 1) . '% terdeteksi cukup tinggi dan berpotensi membuat media tanam terlalu basah.',
+            'action' => 'Kurangi frekuensi penyiraman dan pastikan sirkulasi udara berjalan dengan baik.'
+        ];
+    } elseif ($avg_udara < 60) {
+        $rekomendasi[] = [
+            'type' => 'kelembaban_rendah',
+            'icon' => '🏜️',
+            'title' => 'Kelembaban Rendah',
+            'message' => 'Kelembaban rata-rata ' . number_format($avg_udara, 1) . '% masih rendah sehingga tanaman membutuhkan tambahan air.',
+            'action' => 'Tingkatkan frekuensi penyiraman untuk menjaga kelembaban lingkungan tanaman.'
+        ];
+    }
+
     // Kondisi optimal
     if (
         $avg_suhu >= 25 && $avg_suhu <= 30 &&
-        $avg_kelembaban >= 60 && $avg_kelembaban <= 80
+        $avg_kelembaban >= 60 && $avg_kelembaban <= 80 &&
+        $avg_udara >= 60 && $avg_udara <= 80
     ) {
         $rekomendasi[] = [
             'type' => 'optimal',
@@ -161,8 +199,9 @@ function getRekomendasi($avg_suhu, $avg_kelembaban)
 
 
 $status_suhu = getStatusSuhu($avg_suhu);
-$status_kelembaban = getStatusKelembaban($avg_kelembaban);
-$rekomendasi_list = getRekomendasi($avg_suhu, $avg_kelembaban);
+$status_kelembaban_tanah = getStatusKelembaban($avg_kelembaban);
+$status_kelembaban_udara = getStatusUdara($avg_udara);
+$rekomendasi_list = getRekomendasi($avg_suhu, $avg_kelembaban, $avg_udara);
 
 // Jadwal penyiraman optimal berdasarkan analisis
 $jadwal_optimal = [];
@@ -526,7 +565,7 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
                     <div class="card-body">
                         <div class="analysis-grid">
                             <div class="analysis-card temperature">
-                                <div class="analysis-label">🌡️ SUHU RATA-RATA</div>
+                                <div class="analysis-label">🌡️ RATA-RATA SUHU UDARA</div>
                                 <div class="analysis-value"><?php echo number_format($avg_suhu, 1); ?>°C</div>
                                 <div class="analysis-range">
                                     <span class="status-indicator <?php echo $status_suhu['class']; ?>"></span>
@@ -538,14 +577,26 @@ if ($avg_suhu > 30 || $avg_kelembaban < 60) {
                             </div>
 
                             <div class="analysis-card humidity">
-                                <div class="analysis-label">💧 KELEMBABAN RATA-RATA</div>
+                                <div class="analysis-label">💧 RATA-RATA KELEMBABAN TANAH</div>
                                 <div class="analysis-value"><?php echo number_format($avg_kelembaban, 1); ?>%</div>
                                 <div class="analysis-range">
-                                    <span class="status-indicator <?php echo $status_kelembaban['class']; ?>"></span>
-                                    <?php echo $status_kelembaban['text']; ?>
+                                    <span class="status-indicator <?php echo $status_kelembaban_tanah['class']; ?>"></span>
+                                    <?php echo $status_kelembaban_tanah['text']; ?>
                                 </div>
                                 <div class="analysis-range">
                                     Rentang: <?php echo number_format($min_kelembaban, 1); ?>% - <?php echo number_format($max_kelembaban, 1); ?>%
+                                </div>
+                            </div>
+
+                            <div class="analysis-card humidity">
+                                <div class="analysis-label">💧 RATA-RATA KELEMBABAN UDARA</div>
+                                <div class="analysis-value"><?php echo number_format($avg_udara, 1); ?>%</div>
+                                <div class="analysis-range">
+                                    <span class="status-indicator <?php echo $status_kelembaban_udara['class']; ?>"></span>
+                                    <?php echo $status_kelembaban_udara['text']; ?>
+                                </div>
+                                <div class="analysis-range">
+                                    Rentang: <?php echo number_format($min_udara, 1); ?>% - <?php echo number_format($max_udara, 1); ?>%
                                 </div>
                             </div>
                         </div>

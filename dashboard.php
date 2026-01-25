@@ -181,7 +181,7 @@ function getStatusClass($status)
 // Hitung status jika ada data sensor
 $mushroom_status = null;
 if ($sensor_data) {
-    $mushroom_status = getMushroomStatus($sensor_data['suhu'], $sensor_data['kelembaban'], $sensor_data['kelembaban_udara']);
+    $mushroom_status = getMushroomStatus($sensor_data['suhu'], $sensor_data['soil_moisture'], $sensor_data['kelembaban']);
 }
 ?>
 
@@ -701,7 +701,7 @@ if ($sensor_data) {
                     <?php if ($sensor_data): ?>
                         <div class="data-grid">
                             <div class="data-card temperature">
-                                <div class="data-label">🌡️ SUHU</div>
+                                <div class="data-label">🌡️ SUHU UDARA</div>
                                 <div class="data-value" id="suhu-display">
                                     <?php echo number_format($sensor_data['suhu'], 1); ?>
                                 </div>
@@ -733,7 +733,39 @@ if ($sensor_data) {
                             </div>
 
                             <div class="data-card humidity">
-                                <div class="data-label">💧 KELEMBABAN</div>
+                                <div class="data-label">💧 KELEMBABAN TANAH</div>
+                                <div class="data-value" id="kelembaban-display">
+                                    <?php echo number_format($sensor_data['soil_moisture'], 1); ?>
+                                </div>
+                                <div class="data-unit">%</div>
+
+                                <?php if ($mushroom_status): ?>
+                                    <div class="status-badge" id="kelembaban-status">
+                                        <?php
+                                            switch ($mushroom_status['soil_moisture']) {
+                                                case 'optimal':
+                                                    echo '✅ IDEAL';
+                                                    break;
+                                                case 'kurang_ideal':
+                                                    echo '⚠️ KURANG IDEAL';
+                                                    break;
+                                                case 'terlalu_kering':
+                                                    echo '🏜️ TERLALU KERING';
+                                                    break;
+                                                case 'terlalu_lembab':
+                                                    echo '💧 TERLALU LEMBAB';
+                                                    break;
+                                            }
+                                        ?>
+                                    </div>
+                                    <div class="status-message" id="kelembaban-message">
+                                        <?php echo getStatusMessage($mushroom_status['soil_moisture'], 'soil_moisture'); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="data-card humidity">
+                                <div class="data-label">💧 KELEMBABAN UDARA</div>
                                 <div class="data-value" id="kelembaban-display">
                                     <?php echo number_format($sensor_data['kelembaban'], 1); ?>
                                 </div>
@@ -760,38 +792,6 @@ if ($sensor_data) {
                                     </div>
                                     <div class="status-message" id="kelembaban-message">
                                         <?php echo getStatusMessage($mushroom_status['kelembaban'], 'kelembaban'); ?>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="data-card humidity">
-                                <div class="data-label">💧 KELEMBABAN UDARA</div>
-                                <div class="data-value" id="kelembaban-display">
-                                    <?php echo number_format($sensor_data['kelembaban_udara'], 1); ?>
-                                </div>
-                                <div class="data-unit">%</div>
-
-                                <?php if ($mushroom_status): ?>
-                                    <div class="status-badge" id="kelembaban-status">
-                                        <?php
-                                            switch ($mushroom_status['kelembaban_udara']) {
-                                                case 'optimal':
-                                                    echo '✅ IDEAL';
-                                                    break;
-                                                case 'kurang_ideal':
-                                                    echo '⚠️ KURANG IDEAL';
-                                                    break;
-                                                case 'terlalu_kering':
-                                                    echo '🏜️ TERLALU KERING';
-                                                    break;
-                                                case 'terlalu_lembab':
-                                                    echo '💧 TERLALU LEMBAB';
-                                                    break;
-                                            }
-                                        ?>
-                                    </div>
-                                    <div class="status-message" id="kelembaban-message">
-                                        <?php echo getStatusMessage($mushroom_status['kelembaban_udara'], 'kelembaban_udara'); ?>
                                     </div>
                                 <?php endif; ?>
                             </div>

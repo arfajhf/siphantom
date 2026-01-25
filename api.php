@@ -16,6 +16,7 @@ if (!empty($action)) {
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $kode = $_POST['kode'] ?? '';
     $suhu = $_POST['suhu'] ?? '';
+    $soil_moisture = $_POST['soil_moisture'] ?? '';
     $kelembaban = $_POST['kelembaban'] ?? '';
     $username = $_POST['username'] ?? '';
     
@@ -25,12 +26,12 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rtc_time = $_POST['rtc_time'] ?? null;
     
     // Validasi data
-    if (empty($kode) || empty($suhu) || empty($kelembaban) || empty($username)) {
+    if (empty($kode) || empty($suhu) || empty($soil_moisture) || empty($kelembaban) || empty($username)) {
         http_response_code(400);
         echo json_encode([
             'status' => 'error',
             'message' => 'Data tidak lengkap',
-            'required' => ['kode', 'suhu', 'kelembaban', 'username']
+            'required' => ['kode', 'suhu', 'kelembaban', 'soil_moisture', 'username']
         ]);
         exit;
     }
@@ -47,6 +48,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Siapkan data untuk disimpan
     $suhu = floatval($suhu);
+    $soil_moisture = floatval($soil_moisture);
     $kelembaban = floatval($kelembaban);
     $tanggal = date('Y-m-d');
     $waktu = date('H:i:s');
@@ -54,8 +56,8 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Simpan data sensor dengan parameter baru
     $rtc_time_sql = $rtc_time ? "'$rtc_time'" : 'NULL';
-    $query = "INSERT INTO sensors (kode_device, suhu, kelembaban, tanggal, waktu, timestamp, relay_mode, rtc_time) 
-              VALUES ('$kode', $suhu, $kelembaban, '$tanggal', '$waktu', '$timestamp', '$relay_mode', $rtc_time_sql)";
+    $query = "INSERT INTO sensors (kode_device, suhu, soil_moisture, kelembaban, tanggal, waktu, timestamp, relay_mode, rtc_time) 
+              VALUES ('$kode', $suhu, $soil_moisture, $kelembaban, '$tanggal', '$waktu', '$timestamp', '$relay_mode', $rtc_time_sql)";
     
     if (mysqli_query($conn, $query)) {
         // Update device last seen
@@ -67,6 +69,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'data' => [
                 'kode' => $kode,
                 'suhu' => $suhu,
+                'soil_moisture' => $soil_moisture,
                 'kelembaban' => $kelembaban,
                 'relay_status' => intval($relay_status),
                 'relay_mode' => $relay_mode,

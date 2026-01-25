@@ -33,7 +33,7 @@ if (!cek_akses_device($username, $device)) {
 }
 
 // Ambil data sensor terbaru dengan timestamp
-$query = "SELECT suhu, kelembaban, tanggal, waktu, timestamp FROM sensors WHERE kode_device = '$device' ORDER BY timestamp DESC LIMIT 1";
+$query = "SELECT * FROM sensors WHERE kode_device = '$device' ORDER BY timestamp DESC LIMIT 1";
 $result = mysqli_query($conn, $query);
 
 if ($result && mysqli_num_rows($result) > 0) {
@@ -42,6 +42,7 @@ if ($result && mysqli_num_rows($result) > 0) {
     // Format response dengan data lengkap
     $response = [
         'suhu' => floatval($data['suhu']),
+        'soil_moisture' => floatval($data['soil_moisture']),
         'kelembaban' => floatval($data['kelembaban']),
         'tanggal' => date('d/m/Y', strtotime($data['tanggal'])),
         'waktu' => date('H:i:s', strtotime($data['waktu'])),
@@ -55,6 +56,7 @@ if ($result && mysqli_num_rows($result) > 0) {
     // Tidak ada data sensor
     echo json_encode([
         'suhu' => 0,
+        'soil_moisture' => 0,
         'kelembaban' => 0,
         'tanggal' => '-',
         'waktu' => '-',

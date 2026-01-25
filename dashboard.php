@@ -130,7 +130,7 @@ function getMushroomStatus($suhu, $soil_moisture, $kelembaban_udara)
         $udara_status = 'kurang_ideal';
     }
 
-    return ['suhu' => $suhu_status, 'soil_moisture' => $soil_moisture, 'kelembaban' => $udara_status];
+    return ['suhu' => $suhu_status, 'soil_moisture' => $kelembaban_status, 'kelembaban' => $udara_status];
 }
 
 // Fungsi untuk mendapatkan pesan status
@@ -742,7 +742,7 @@ if ($sensor_data) {
                                 <?php if ($mushroom_status): ?>
                                     <div class="status-badge" id="kelembaban-status">
                                         <?php
-                                            switch ($mushroom_status['kelembaban']) {
+                                            switch ($mushroom_status['soil_moisture']) {
                                                 case 'optimal':
                                                     echo '✅ IDEAL';
                                                     break;
@@ -759,7 +759,7 @@ if ($sensor_data) {
                                         ?>
                                     </div>
                                     <div class="status-message" id="kelembaban-message">
-                                        <?php echo getStatusMessage($mushroom_status['kelembaban'], 'kelembaban'); ?>
+                                        <?php echo getStatusMessage($mushroom_status['soil_moisture'], 'soil_moisture'); ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -772,7 +772,7 @@ if ($sensor_data) {
                                 <div class="data-unit">%</div>
 
                                 <?php if ($mushroom_status): ?>
-                                    <div class="status-badge" id="kelembaban-status">
+                                    <div class="status-badge" id="udara-status">
                                         <?php
                                             switch ($mushroom_status['kelembaban']) {
                                                 case 'optimal':
@@ -790,7 +790,7 @@ if ($sensor_data) {
                                             }
                                         ?>
                                     </div>
-                                    <div class="status-message" id="kelembaban-message">
+                                    <div class="status-message" id="udara-message">
                                         <?php echo getStatusMessage($mushroom_status['kelembaban'], 'kelembaban'); ?>
                                     </div>
                                 <?php endif; ?>
@@ -846,6 +846,7 @@ if ($sensor_data) {
         const deviceCode = '<?php echo $selected_device; ?>';
         let lastSuhu = '<?php echo isset($sensor_data['suhu']) ? number_format($sensor_data['suhu'], 1) : '0'; ?>';
         let lastKelembaban = '<?php echo isset($sensor_data['kelembaban']) ? number_format($sensor_data['kelembaban'], 1) : '0'; ?>';
+        let lastSoil_moisture = '<?php echo isset($sensor_data['soil_moisture']) ? number_format($sensor_data['soil_moisture'], 1) : '0'; ?>';
         let lastTimestamp = '<?php echo isset($sensor_data['tanggal']) && isset($sensor_data['waktu']) ? date('d/m/Y', strtotime($sensor_data['tanggal'])) . ' pukul ' . date('H:i:s', strtotime($sensor_data['waktu'])) : ''; ?>';
 
         function gantiDevice(kode) {
@@ -932,7 +933,7 @@ if ($sensor_data) {
 
             // Cek status kelembaban
             if (udara < udaraMin - 10) {
-                kelembabanStatus = 'terlalu_kering';
+                udaraStatus = 'terlalu_kering';
             } else if (udara > udaraMax + 5) {
                 udaraStatus = 'terlalu_lembab';
             } else if (udara < udaraMin || udara > udaraMax) {
@@ -942,7 +943,7 @@ if ($sensor_data) {
             return {
                 suhu: suhuStatus,
                 kelembaban: kelembabanStatus,
-                kelembaban_udara: udaraStatus
+                udara: udaraStatus
             };
         }
 
@@ -961,7 +962,7 @@ if ($sensor_data) {
                     'terlalu_kering': '🏜️ Terlalu kering, perlu penyiraman',
                     'terlalu_lembab': '💧 Terlalu lembab, perlu ventilasi'
                 },
-                'kelembaban_udara': {
+                'udara': {
                     'optimal': '✅ Ideal untuk pertumbuhan ',
                     'kurang_ideal': '⚠️ Kurang ideal, perlu penyesuaian',
                     'terlalu_kering': '🏜️ Terlalu kering, perlu penyiraman',

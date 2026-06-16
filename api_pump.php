@@ -1,11 +1,18 @@
 <?php
-// /api_pump.php di Siphantom
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: X-API-KEY, Content-Type");
+
+// Tambahin ini: Kalau request-nya OPTIONS (pre-flight), langsung berhentiin
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;
+}
+
 header('Content-Type: application/json');
 
-// 1. Panggil koneksi lo yang udah ada
-include 'koneksi.php'; // Pastiin path-nya bener (misal '../koneksi.php')
 
-// 2. Cek API Key (Sama kayak tadi)
+include 'koneksi.php'; 
+
 $headers = getallheaders();
 if (!isset($headers['X-API-KEY']) || $headers['X-API-KEY'] !== 'token-rahasia-hydrofarm') {
     http_response_code(403);
@@ -20,8 +27,6 @@ $data = json_decode($json, true);
 if ($data && isset($data['status'])) {
     $status = $data['status'] == 'on' ? 1 : 0;
     
-    // 4. Pake variabel $conn atau $koneksi (sesuain sama nama variabel di koneksi.php lo)
-    // Contoh kalau di koneksi.php lo variabelnya $conn:
     $query = "UPDATE relays SET status = $status WHERE kode_device = 'JAMUR395'";
     $stmt = $conn->prepare($query);
     

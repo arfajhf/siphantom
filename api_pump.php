@@ -22,14 +22,13 @@ if ($data && isset($data['status'])) {
     
     // 4. Pake variabel $conn atau $koneksi (sesuain sama nama variabel di koneksi.php lo)
     // Contoh kalau di koneksi.php lo variabelnya $conn:
-    $sql = "UPDATE `relays` SET `status` = ? WHERE `kode_device` = 'JAMUR395'";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $status);
+    $query = "UPDATE relays SET status = $status WHERE kode_device = 'JAMUR395'";
+    $stmt = $conn->prepare($query);
     
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate']);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Gagal update database']);
+        echo json_encode(['status' => 'error', 'message' => $conn->error]);
     }
     $stmt->close();
 } else {

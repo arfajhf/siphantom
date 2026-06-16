@@ -1,37 +1,48 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: X-API-KEY, Content-Type");
 
-// Tambahin ini: Kalau request-nya OPTIONS (pre-flight), langsung berhentiin
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit;
-}
-
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') { exit; }
 header('Content-Type: application/json');
-
 
 include 'koneksi.php'; 
 
+// --- FITUR LOG: Biar lo tau siapa yang nembak API ---
+$logMessage = date('Y-m-d H:i:s') . " | IP: " . $_SERVER['REMOTE_ADDR'] . " | Data: " . file_get_contents('php://input') . "\n";
+file_put_contents('akses_api.log', $logMessage, FILE_APPEND);
+
+// --- CEK API KEY ---
 $headers = getallheaders();
-if (!isset($headers['X-API-KEY']) || $headers['X-API-KEY'] !== 'token-rahasia-hydrofarm') {
+$apiKey = $headers['X-API-KEY'] ?? '';
+if ($apiKey !== 'token-rahasia-hydrofarm') {
     http_response_code(403);
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit;
 }
 
-// 3. Tangkap data
+// --- TANGKAP DAN VALIDASI DATA ---
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
 if ($data && isset($data['status'])) {
-    $status = $data['status'] == 'on' ? 1 : 0;
+    $statusInput = $data['status']; // 'on' atau 'off'
+
+    // VALIDASI KETAT: Biar gak sembarang status masuk (Anti-Bot)
+    if ($statusInput !== 'on' && $statusInput !== 'off') {
+        echo json_encode(['status' => 'error', 'message' => 'Status harus on atau off']);
+        exit;
+    }
+
+    $statusDB = ($statusInput == 'on') ? 1 : 0;
     
-    $query = "UPDATE relays SET status = $status WHERE kode_device = 'JAMUR395'";
+    // Gunakan Prepared Statement biar aman dari SQL Injection
+    $query = "UPDATE relays SET status = ?, terakhir_update = NOW() WHERE kode_device = 'JAMUR395'";
     $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $statusDB);
     
     if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate']);
+        echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate ke ' . $statusInput]);
     } else {
         echo json_encode(['status' => 'error', 'message' => $conn->error]);
     }

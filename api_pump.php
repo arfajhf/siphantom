@@ -22,7 +22,7 @@ if ($data && isset($data['status'])) {
     
     // 4. Pake variabel $conn atau $koneksi (sesuain sama nama variabel di koneksi.php lo)
     // Contoh kalau di koneksi.php lo variabelnya $conn:
-    $sql = "UPDATE status_pompa SET state = ? WHERE id = 1";
+    $sql = "UPDATE relays SET status = ? WHERE kode_device = JAMUR395";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $status);
     

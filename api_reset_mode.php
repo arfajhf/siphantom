@@ -7,5 +7,10 @@ header("Access-Control-Allow-Headers: X-API-KEY, Content-Type");
 header('Content-Type: application/json');
 
 include 'koneksi.php';
-$conn->query("UPDATE settings SET value = 'auto' WHERE `key` = 'mode'");
-echo json_encode(['status' => 'success']);
+
+$query = "UPDATE settings SET value = 'auto' WHERE `key` = 'mode'";
+if ($conn->query($query) === TRUE) {
+    echo json_encode(['status' => 'success', 'message' => 'Mode direset ke otomatis']);
+} else {
+    echo json_encode(['status' => 'error', 'message' => $conn->error]);
+}

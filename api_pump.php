@@ -29,21 +29,23 @@ $data = json_decode($json, true);
 
 if ($data && isset($data['status'])) {
     $statusInput = $data['status'];
-    
+
     if ($statusInput !== 'on' && $statusInput !== 'off') {
         echo json_encode(['status' => 'error', 'message' => 'Status harus on atau off']);
         exit;
     }
 
     $statusDB = ($statusInput == 'on') ? 1 : 0;
-    
+
     $query = "UPDATE relays SET status = ?, terakhir_update = NOW() WHERE kode_device = 'JAMUR395'";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $statusDB);
-    
+
     if ($stmt->execute()) {
         // Tulis manual ke file mode agar Laravel berhenti otomatis
-        $conn->query("UPDATE modeset SET value = 'manual' WHERE id = 1");
+        if (isset($data['mode']) && $data['mode'] == 'user') {
+            $conn->query("UPDATE modeset SET value = 'manual' WHERE id = 1");
+        }
         echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate ke ' . $statusInput . ' (Mode Manual)']);
     } else {
         echo json_encode(['status' => 'error', 'message' => $conn->error]);

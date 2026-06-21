@@ -11,7 +11,7 @@ header("Access-Control-Allow-Headers: Content-Type, X-API-KEY");
 // echo json_encode(['status' => 'success', 'message' => 'Mode Reset ke Auto']);
 
 header("Access-Control-Allow-Origin: *");
-$file = 'mode.txt';
+$file = '/home/analyzer/realtywire.web.id/siphantom.realtywire.web.id/mode.txt';
 
 // Tes apakah folder/file writable
 if (is_writable($file)) {

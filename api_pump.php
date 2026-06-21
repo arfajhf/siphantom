@@ -43,7 +43,12 @@ if ($data && isset($data['status'])) {
 
     if ($stmt->execute()) {
         if (isset($data['mode']) && $data['mode'] == 'manual') {
-            $conn->query("UPDATE modeset SET value = 'manual' WHERE id = 1");
+            $modeQuery = "UPDATE modeset SET value = 'manual' WHERE id = 1";
+            if ($conn->query($modeQuery)) {
+                echo json_encode(['status' => 'success', 'message' => 'Pompa OK, Mode Manual OK']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Pompa OK, tapi Gagal update Mode: ' . $conn->error]);
+            }
         }
         echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate ke ' . $statusInput . ' (Mode Manual)']);
     } else {

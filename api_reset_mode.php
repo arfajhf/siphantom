@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 
 include 'koneksi.php';
 
-$query = "UPDATE settings SET value = 'auto' WHERE `key` = 'mode'";
+$query = "UPDATE modeset SET value = 'auto' WHERE id = 1";
 if ($conn->query($query) === TRUE) {
     echo json_encode(['status' => 'success', 'message' => 'Mode direset ke otomatis']);
 } else {

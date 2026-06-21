@@ -43,7 +43,7 @@ if ($data && isset($data['status'])) {
     
     if ($stmt->execute()) {
         // Tulis manual ke file mode agar Laravel berhenti otomatis
-        file_put_contents('mode.txt', 'manual');
+        $conn->query("UPDATE settings SET value = 'manual' WHERE `key` = 'mode'");
         echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate ke ' . $statusInput . ' (Mode Manual)']);
     } else {
         echo json_encode(['status' => 'error', 'message' => $conn->error]);

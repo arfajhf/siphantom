@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 include 'koneksi.php'; // Pastikan koneksi DB lo ke database Siphantom udah bener
 
 // Ambil nilai mode dari database
-$result = $conn->query("SELECT value FROM settings WHERE `key` = 'mode'");
+$result = $conn->query("SELECT value FROM modeset WHERE id = 1");
 $row = $result->fetch_assoc();
 
 // Kirim balik ke Laravel

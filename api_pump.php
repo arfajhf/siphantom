@@ -28,29 +28,23 @@ $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
 if ($data && isset($data['status'])) {
-    $statusInput = $data['status']; // 'on' atau 'off'
-
-    // VALIDASI KETAT: Biar gak sembarang status masuk (Anti-Bot)
+    $statusInput = $data['status'];
+    
     if ($statusInput !== 'on' && $statusInput !== 'off') {
         echo json_encode(['status' => 'error', 'message' => 'Status harus on atau off']);
         exit;
     }
 
     $statusDB = ($statusInput == 'on') ? 1 : 0;
-
-    // Gunakan Prepared Statement biar aman dari SQL Injection
+    
     $query = "UPDATE relays SET status = ?, terakhir_update = NOW() WHERE kode_device = 'JAMUR395'";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $statusDB);
-
+    
     if ($stmt->execute()) {
-        if ($stmt->execute()) {
-            file_put_contents('mode.txt', 'manual'); // Kunci ke manual saat di-update manual
-            echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate (Manual Mode)']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => $conn->error]);
-        }
-        echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate ke ' . $statusInput]);
+        // Tulis manual ke file mode agar Laravel berhenti otomatis
+        file_put_contents('mode.txt', 'manual');
+        echo json_encode(['status' => 'success', 'message' => 'Pompa diupdate ke ' . $statusInput . ' (Mode Manual)']);
     } else {
         echo json_encode(['status' => 'error', 'message' => $conn->error]);
     }

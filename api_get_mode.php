@@ -1,6 +1,9 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: X-API-KEY, Content-Type");
+
+header('Content-Type: application/json');
 
 include 'koneksi.php'; // Pastikan koneksi DB lo ke database Siphantom udah bener
 
